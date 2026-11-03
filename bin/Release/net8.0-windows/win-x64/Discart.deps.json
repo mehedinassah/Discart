@@ -7,19 +7,19 @@
   "targets": {
     ".NETCoreApp,Version=v8.0": {},
     ".NETCoreApp,Version=v8.0/win-x64": {
-      "DiskAuditPro/1.0.0": {
+      "Discart/1.0.0": {
         "dependencies": {
           "Microsoft.NET.ILLink.Tasks": "8.0.33"
         },
         "runtime": {
-          "DiskAuditPro.dll": {}
+          "Discart.dll": {}
         }
       },
       "Microsoft.NET.ILLink.Tasks/8.0.33": {}
     }
   },
   "libraries": {
-    "DiskAuditPro/1.0.0": {
+    "Discart/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

@@ -10,12 +10,12 @@
 using System;
 using System.Reflection;
 
-[assembly: System.Reflection.AssemblyCompanyAttribute("DiskAuditPro")]
+[assembly: System.Reflection.AssemblyCompanyAttribute("Discart")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
-[assembly: System.Reflection.AssemblyProductAttribute("DiskAuditPro")]
-[assembly: System.Reflection.AssemblyTitleAttribute("DiskAuditPro")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a3284c2d9d75bc4b51da3a0ff3d3147f8d962483")]
+[assembly: System.Reflection.AssemblyProductAttribute("Discart")]
+[assembly: System.Reflection.AssemblyTitleAttribute("Discart")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
 [assembly: System.Runtime.Versioning.TargetPlatformAttribute("Windows7.0")]
 [assembly: System.Runtime.Versioning.SupportedOSPlatformAttribute("Windows7.0")]
