@@ -1,0 +1,3 @@
+C:\Users\nassa\Desktop\DiskAuditPro\bin\Release\net8.0-windows\win-x64\publish\DiskAuditPro.pdb
+C:\Users\nassa\Desktop\DiskAuditPro\bin\Release\net8.0-windows\win-x64\publish\rules.json
+C:\Users\nassa\Desktop\DiskAuditPro\bin\Release\net8.0-windows\win-x64\publish\DiskAuditPro.exe
