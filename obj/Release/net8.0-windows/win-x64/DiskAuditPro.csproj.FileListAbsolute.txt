@@ -18,3 +18,4 @@ C:\Users\nassa\Desktop\DiskAuditPro\obj\Release\net8.0-windows\win-x64\Discart.d
 C:\Users\nassa\Desktop\DiskAuditPro\obj\Release\net8.0-windows\win-x64\refint\Discart.dll
 C:\Users\nassa\Desktop\DiskAuditPro\obj\Release\net8.0-windows\win-x64\Discart.pdb
 C:\Users\nassa\Desktop\DiskAuditPro\obj\Release\net8.0-windows\win-x64\ref\Discart.dll
+C:\Users\nassa\Desktop\DiskAuditPro\obj\Release\net8.0-windows\win-x64\DiskAuditPro.sourcelink.json

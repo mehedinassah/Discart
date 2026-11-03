@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Discart")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a3284c2d9d75bc4b51da3a0ff3d3147f8d962483")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8f8cb91161eb3d4c21632a961bdcf7e41ec3d891")]
 [assembly: System.Reflection.AssemblyProductAttribute("Discart")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Discart")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
