@@ -1,113 +1,380 @@
 ﻿{
-    "version": "1.1.0",
-    "lastUpdated": "2026-11-04",
-    "verdicts": {
-        "Safe": { "label": "Safe to delete", "color": "Green", "preChecked": true, "meaning": "Known cache, temp, or leftover. No user data. Rebuilds itself." },
-        "ProbablySafe": { "label": "Probably safe", "color": "Yellow", "preChecked": false, "meaning": "Rebuildable or recoverable, but a bigger consequence if wrong." },
-        "UserCall": { "label": "Needs your call", "color": "Cyan", "preChecked": false, "meaning": "Could be personal data. Review before deciding." },
-        "Suspicious": { "label": "Suspicious", "color": "DarkYellow", "preChecked": false, "meaning": "Looks wrong - known bug or abnormal size. Investigate." },
-        "DontTouch": { "label": "Don't touch", "color": "Red", "preChecked": false, "meaning": "System-critical. Deleting will break Windows." }
-    },
-    "hardRefuse": [
-        "C:\\Windows", "C:\\Program Files", "C:\\Program Files (x86)", "C:\\ProgramData", 
-        "C:\\Recovery", "C:\\System Volume Information", "C:\\pagefile.sys", "C:\\swapfile.sys"
-    ],
-    "rules": [
-        {
-            "id": "fallback-appdata",
-            "category": "App data",
-            "paths": [ "%LOCALAPPDATA%\\*", "%APPDATA%\\*" ],
-            "type": "Folder",
-            "verdict": "UserCall",
-            "reason": "Unknown application data. We don't have a specific rule for this folder yet.",
-            "article": "This folder belongs to an application installed on your PC. Because it is not in our database, you should inspect it before deleting. It might contain important settings, or it might just be a temporary cache."
-        },
-        {
-            "id": "win-user-temp", "category": "Windows caches", "paths": [ "%TEMP%" ], "type": "Folder", "verdict": "Safe", "reason": "Windows user temp files. Apps recreate them as needed.", "article": "Temp files are the working scratch of Windows. Clearing them is safe; anything deleted gets regenerated when an app needs it."
-        },
-        {
-            "id": "win-system-temp", "category": "Windows caches", "paths": [ "%WINDIR%\\Temp" ], "type": "Folder", "verdict": "Safe", "reason": "Windows system temp files. Recreated on demand.", "article": "System-wide temp directory. Safe to clear; Windows regenerates what it needs."
-        },
-        {
-            "id": "win-update-cache", "category": "Windows caches", "paths": [ "%WINDIR%\\SoftwareDistribution\\Download" ], "type": "Folder", "verdict": "Safe", "reason": "Windows Update download cache. Redownloaded if needed.", "article": "Windows Update stores downloads here before installing them. If deleted, Windows re-downloads only what's still needed."
-        },
-        {
-            "id": "win-live-kernel-reports", "category": "Crash diagnostics", "paths": [ "%WINDIR%\\LiveKernelReports" ], "type": "Folder", "verdict": "Safe", "reason": "Live kernel diagnostic reports.", "article": "Diagnostic dumps written when a driver crashes but doesn't take the system down. Safe to clear."
-        },
-        {
-            "id": "pip-cache", "category": "Developer caches", "paths": [ "%LOCALAPPDATA%\\pip\\Cache" ], "type": "Folder", "verdict": "Safe", "reason": "Python package cache. Rebuilds on next pip install.", "article": "pip stores downloaded wheels here. Clearing it just means the next install re-downloads."
-        },
-        {
-            "id": "npm-cache", "category": "Developer caches", "paths": [ "%APPDATA%\\npm-cache" ], "type": "Folder", "verdict": "Safe", "reason": "npm package cache. Rebuilds on next npm install.", "article": "Same as pip cache, but for Node.js."
-        },
-        {
-            "id": "gradle-cache", "category": "Developer caches", "paths": [ "%USERPROFILE%\\.gradle\\caches" ], "type": "Folder", "verdict": "Safe", "reason": "Gradle build cache. Rebuilds on next Android/Gradle build.", "article": "Used when building Android apps. Safe to clear; the next build re-downloads dependencies."
-        },
-        {
-            "id": "maven-cache", "category": "Developer caches", "paths": [ "%USERPROFILE%\\.m2\\repository" ], "type": "Folder", "verdict": "Safe", "reason": "Maven repository cache. Rebuilds on next Maven build.", "article": "Java dependency cache. Same pattern as Gradle."
-        },
-        {
-            "id": "bluestacks-leftover", "category": "App data", "paths": [ "C:\\ProgramData\\BlueStacks_nxt" ], "type": "Folder", "verdict": "Safe", "reason": "Leftover from BlueStacks. Only delete after uninstalling BlueStacks.", "article": "BlueStacks (Android emulator) stores its engine disks here. After uninstalling BlueStacks, this folder is orphaned and safe to remove."
-        },
-        {
-            "id": "playgames-data", "category": "App data", "paths": [ "%LOCALAPPDATA%\\Google\\Play Games" ], "type": "Folder", "verdict": "Safe", "reason": "Google Play Games emulator data. Only delete after uninstalling Play Games.", "article": "Play Games is a buggy emulator that grows without bound. After uninstalling, this folder is orphaned."
-        },
-        {
-            "id": "playgames-userdata-bug", "category": "Known bugs", "paths": [ "%LOCALAPPDATA%\\Google\\Play Games\\userdata_*\\avd\\userdata.img" ], "type": "File", "verdict": "Suspicious", "reason": "Known Google Play Games bug: this file grows without bound.", "article": "Google Play Games' userdata.img is a well-documented bug. It balloons to hundreds of GB, often much larger than any real data. If Play Games is uninstalled, this file is dead weight."
-        },
-        {
-            "id": "docker-disk", "category": "Developer data", "paths": [ "%LOCALAPPDATA%\\Docker\\wsl\\disk\\docker_data.vhdx" ], "type": "File", "verdict": "ProbablySafe", "reason": "Docker's virtual disk. Prune inside Docker first, then compact.", "article": "Docker stores all images and containers here. 'docker system prune -a' frees unused ones, then the VHDX can be compacted."
-        },
-        {
-            "id": "wsl-disks", "category": "Developer data", "paths": [ "%LOCALAPPDATA%\\wsl" ], "type": "Folder", "verdict": "ProbablySafe", "reason": "WSL distro disks. Deleting loses the Linux environment. Compact instead to shrink.", "article": "Each WSL distro is a VHDX that grows but never shrinks. Compact with Optimize-VHD or diskpart to reclaim space without deleting your environment."
-        },
-        {
-            "id": "android-avd", "category": "Developer data", "paths": [ "%USERPROFILE%\\.android\\avd" ], "type": "Folder", "verdict": "ProbablySafe", "reason": "Android emulator images. Recreate via Android Studio.", "article": "Each AVD is a full Android system image, typically 3-10 GB each. Safe to delete unused ones; Android Studio can recreate them on demand."
-        },
-        {
-            "id": "android-sdk-system-images", "category": "Developer data", "paths": [ "%LOCALAPPDATA%\\Android\\Sdk\\system-images" ], "type": "Folder", "verdict": "ProbablySafe", "reason": "Android system images for the emulator. Re-downloadable via SDK Manager.", "article": "One system image per Android API level. Keep only the levels you actually test on."
-        },
-        {
-            "id": "claude-vm", "category": "App data", "paths": [ "%LOCALAPPDATA%\\Packages\\Claude_pzs8sxrjxfjjc\\LocalCache\\Roaming\\Claude\\vm_bundles" ], "type": "Folder", "verdict": "ProbablySafe", "reason": "Claude Desktop's local VM bundle. Best removed by uninstall + reinstall.", "article": "Claude Desktop runs a local VM for some features. This folder is large but deleting it directly may break the app. Uninstall + reinstall Claude Desktop to remove cleanly."
-        },
-        {
-            "id": "hibernation-file", "category": "System (recoverable)", "paths": [ "C:\\hiberfil.sys" ], "type": "File", "verdict": "ProbablySafe", "reason": "Hibernation file. If you don't use hibernate/sleep, disable with 'powercfg /h off' (admin).", "article": "Takes 40% of your RAM size. Removing it means hibernate and Fast Startup stop working, but normal shutdown/restart still work."
-        },
-        {
-            "id": "onedrive", "category": "User data", "paths": [ "%USERPROFILE%\\OneDrive" ], "type": "Folder", "verdict": "UserCall", "reason": "Synced to cloud. Use 'Free up space' in OneDrive settings.", "article": "OneDrive keeps local copies of cloud files. If space is tight, right-click tray -> Free up space - this converts them to online-only placeholders without losing anything."
-        },
-        {
-            "id": "downloads", "category": "User data", "paths": [ "%USERPROFILE%\\Downloads" ], "type": "Folder", "verdict": "UserCall", "reason": "Your downloads. Review contents before removing.", "article": "Downloads can contain anything from installers to personal files. Check the top items before deciding."
-        },
-        {
-            "id": "documents", "category": "User data", "paths": [ "%USERPROFILE%\\Documents" ], "type": "Folder", "verdict": "UserCall", "reason": "Your personal documents.", "article": "Personal files. Review before deleting anything in here."
-        },
-        {
-            "id": "videos", "category": "User data", "paths": [ "%USERPROFILE%\\Videos" ], "type": "Folder", "verdict": "UserCall", "reason": "Your videos.", "article": "Video files are large but irreplaceable. Back up, don't delete."
-        },
-        {
-            "id": "windows", "category": "System", "paths": [ "C:\\Windows" ], "type": "Folder", "verdict": "DontTouch", "reason": "Operating system. Use Disk Cleanup for safe reclaiming.", "article": "Never delete this folder. Use Settings -> System -> Storage or cleanmgr for safe space recovery."
-        },
-        {
-            "id": "program-files", "category": "System", "paths": [ "C:\\Program Files" ], "type": "Folder", "verdict": "DontTouch", "reason": "Installed applications. Uninstall via Settings.", "article": "Deleting an installed app's folder leaves registry entries and services orphaned. Use Settings -> Apps -> Uninstall."
-        },
-        {
-            "id": "program-files-x86", "category": "System", "paths": [ "C:\\Program Files (x86)" ], "type": "Folder", "verdict": "DontTouch", "reason": "Installed applications. Uninstall via Settings.", "article": "Same as Program Files, for 32-bit applications."
-        },
-        {
-            "id": "recovery", "category": "System", "paths": [ "C:\\Recovery" ], "type": "Folder", "verdict": "DontTouch", "reason": "Windows recovery environment.", "article": "Needed to repair or reset Windows. Never delete."
-        },
-        {
-            "id": "pagefile", "category": "System", "paths": [ "C:\\pagefile.sys" ], "type": "File", "verdict": "DontTouch", "reason": "Windows virtual memory. Deleting it can prevent Windows from booting.", "article": "Windows uses pagefile as overflow RAM. You can move it to another drive or resize it, but never delete it.", "detect": "pagefile"
-        },
-        {
-            "id": "system-volume-info", "category": "System", "paths": [ "C:\\System Volume Information" ], "type": "Folder", "verdict": "DontTouch", "reason": "System restore points.", "article": "Windows keeps restore points here. Shrinking the shadow storage cap via vssadmin frees space safely."
-        },
-        {
-            "id": "comfyui-models", "category": "App data", "paths": [ "%USERPROFILE%\\ComfyUI" ], "type": "Folder", "verdict": "UserCall", "reason": "ComfyUI AI models. Large but required if you use ComfyUI.", "article": "ComfyUI's models folder is often 10-50 GB. If you use ComfyUI, don't delete - back up the models. If not, safe to remove."
-        },
-        {
-            "id": "vscode-extensions", "category": "App data", "paths": [ "%USERPROFILE%\\.vscode\\extensions" ], "type": "Folder", "verdict": "ProbablySafe", "reason": "VS Code extensions. Re-installable from your extensions list.", "article": "Each extension is a folder here. Re-installable from Settings -> Extensions -> @installed."
-        }
-    ]
+    "version":  "1.0.0",
+    "lastUpdated":  "2026-11-04",
+    "verdicts":  {
+                     "Safe":  {
+                                  "label":  "Safe to delete",
+                                  "color":  "Green",
+                                  "preChecked":  true,
+                                  "meaning":  "Known cache, temp, or leftover. No user data. Rebuilds itself."
+                              },
+                     "ProbablySafe":  {
+                                          "label":  "Probably safe",
+                                          "color":  "Yellow",
+                                          "preChecked":  false,
+                                          "meaning":  "Rebuildable or recoverable, but a bigger consequence if wrong."
+                                      },
+                     "UserCall":  {
+                                      "label":  "Needs your call",
+                                      "color":  "Cyan",
+                                      "preChecked":  false,
+                                      "meaning":  "Could be personal data. Review before deciding."
+                                  },
+                     "Suspicious":  {
+                                        "label":  "Suspicious",
+                                        "color":  "DarkYellow",
+                                        "preChecked":  false,
+                                        "meaning":  "Looks wrong - known bug or abnormal size. Investigate."
+                                    },
+                     "DontTouch":  {
+                                       "label":  "Don\u0027t touch",
+                                       "color":  "Red",
+                                       "preChecked":  false,
+                                       "meaning":  "System-critical. Deleting will break Windows."
+                                   }
+                 },
+    "hardRefuse":  [
+                       "C:\\Windows",
+                       "C:\\Program Files",
+                       "C:\\Program Files (x86)",
+                       "C:\\ProgramData",
+                       "C:\\Recovery",
+                       "C:\\System Volume Information",
+                       "C:\\pagefile.sys",
+                       "C:\\swapfile.sys"
+                   ],
+    "rules":  [
+                  {
+                      "id":  "fallback-appdata",
+                      "category":  "App data",
+                      "paths":  [
+                                    "%LOCALAPPDATA%\\*",
+                                    "%APPDATA%\\*"
+                                ],
+                      "type":  "Folder",
+                      "verdict":  "UserCall",
+                      "reason":  "Unknown application data. We don\u0027t have a specific rule for this folder yet.",
+                      "article":  "This folder belongs to an application installed on your PC. Because it is not in our database, you should inspect it before deleting. It might contain important settings, or it might just be a temporary cache."
+                  },
+                  {
+                      "id":  "win-user-temp",
+                      "category":  "Windows caches",
+                      "paths":  [
+                                    "%TEMP%"
+                                ],
+                      "type":  "Folder",
+                      "verdict":  "Safe",
+                      "reason":  "Windows user temp files. Apps recreate them as needed.",
+                      "article":  "Temp files are the working scratch of Windows. Clearing them is safe; anything deleted gets regenerated when an app needs it."
+                  },
+                  {
+                      "id":  "win-system-temp",
+                      "category":  "Windows caches",
+                      "paths":  [
+                                    "%WINDIR%\\Temp"
+                                ],
+                      "type":  "Folder",
+                      "verdict":  "Safe",
+                      "reason":  "Windows system temp files. Recreated on demand.",
+                      "article":  "System-wide temp directory. Safe to clear; Windows regenerates what it needs."
+                  },
+                  {
+                      "id":  "win-update-cache",
+                      "category":  "Windows caches",
+                      "paths":  [
+                                    "%WINDIR%\\SoftwareDistribution\\Download"
+                                ],
+                      "type":  "Folder",
+                      "verdict":  "Safe",
+                      "reason":  "Windows Update download cache. Redownloaded if needed.",
+                      "article":  "Windows Update stores downloads here before installing them. If deleted, Windows re-downloads only what\u0027s still needed."
+                  },
+                  {
+                      "id":  "win-live-kernel-reports",
+                      "category":  "Crash diagnostics",
+                      "paths":  [
+                                    "%WINDIR%\\LiveKernelReports"
+                                ],
+                      "type":  "Folder",
+                      "verdict":  "Safe",
+                      "reason":  "Live kernel diagnostic reports.",
+                      "article":  "Diagnostic dumps written when a driver crashes but doesn\u0027t take the system down. Safe to clear."
+                  },
+                  {
+                      "id":  "pip-cache",
+                      "category":  "Developer caches",
+                      "paths":  [
+                                    "%LOCALAPPDATA%\\pip\\Cache"
+                                ],
+                      "type":  "Folder",
+                      "verdict":  "Safe",
+                      "reason":  "Python package cache. Rebuilds on next pip install.",
+                      "article":  "pip stores downloaded wheels here. Clearing it just means the next install re-downloads."
+                  },
+                  {
+                      "id":  "npm-cache",
+                      "category":  "Developer caches",
+                      "paths":  [
+                                    "%APPDATA%\\npm-cache"
+                                ],
+                      "type":  "Folder",
+                      "verdict":  "Safe",
+                      "reason":  "npm package cache. Rebuilds on next npm install.",
+                      "article":  "Same as pip cache, but for Node.js."
+                  },
+                  {
+                      "id":  "gradle-cache",
+                      "category":  "Developer caches",
+                      "paths":  [
+                                    "%USERPROFILE%\\.gradle\\caches"
+                                ],
+                      "type":  "Folder",
+                      "verdict":  "Safe",
+                      "reason":  "Gradle build cache. Rebuilds on next Android/Gradle build.",
+                      "article":  "Used when building Android apps. Safe to clear; the next build re-downloads dependencies."
+                  },
+                  {
+                      "id":  "maven-cache",
+                      "category":  "Developer caches",
+                      "paths":  [
+                                    "%USERPROFILE%\\.m2\\repository"
+                                ],
+                      "type":  "Folder",
+                      "verdict":  "Safe",
+                      "reason":  "Maven repository cache. Rebuilds on next Maven build.",
+                      "article":  "Java dependency cache. Same pattern as Gradle."
+                  },
+                  {
+                      "id":  "bluestacks-leftover",
+                      "category":  "App data",
+                      "paths":  [
+                                    "C:\\ProgramData\\BlueStacks_nxt"
+                                ],
+                      "type":  "Folder",
+                      "verdict":  "Safe",
+                      "reason":  "Leftover from BlueStacks. Only delete after uninstalling BlueStacks.",
+                      "article":  "BlueStacks (Android emulator) stores its engine disks here. After uninstalling BlueStacks, this folder is orphaned and safe to remove."
+                  },
+                  {
+                      "id":  "playgames-data",
+                      "category":  "App data",
+                      "paths":  [
+                                    "%LOCALAPPDATA%\\Google\\Play Games"
+                                ],
+                      "type":  "Folder",
+                      "verdict":  "Safe",
+                      "reason":  "Google Play Games emulator data. Only delete after uninstalling Play Games.",
+                      "article":  "Play Games is a buggy emulator that grows without bound. After uninstalling, this folder is orphaned."
+                  },
+                  {
+                      "id":  "playgames-userdata-bug",
+                      "category":  "Known bugs",
+                      "paths":  [
+                                    "%LOCALAPPDATA%\\Google\\Play Games\\userdata_*\\avd\\userdata.img"
+                                ],
+                      "type":  "File",
+                      "verdict":  "Suspicious",
+                      "reason":  "Known Google Play Games bug: this file grows without bound.",
+                      "article":  "Google Play Games\u0027 userdata.img is a well-documented bug. It balloons to hundreds of GB, often much larger than any real data. If Play Games is uninstalled, this file is dead weight."
+                  },
+                  {
+                      "id":  "docker-disk",
+                      "category":  "Developer data",
+                      "paths":  [
+                                    "%LOCALAPPDATA%\\Docker\\wsl\\disk\\docker_data.vhdx"
+                                ],
+                      "type":  "File",
+                      "verdict":  "ProbablySafe",
+                      "reason":  "Docker\u0027s virtual disk. Prune inside Docker first, then compact.",
+                      "article":  "Docker stores all images and containers here. \u0027docker system prune -a\u0027 frees unused ones, then the VHDX can be compacted."
+                  },
+                  {
+                      "id":  "wsl-disks",
+                      "category":  "Developer data",
+                      "paths":  [
+                                    "%LOCALAPPDATA%\\wsl"
+                                ],
+                      "type":  "Folder",
+                      "verdict":  "ProbablySafe",
+                      "reason":  "WSL distro disks. Deleting loses the Linux environment. Compact instead to shrink.",
+                      "article":  "Each WSL distro is a VHDX that grows but never shrinks. Compact with Optimize-VHD or diskpart to reclaim space without deleting your environment."
+                  },
+                  {
+                      "id":  "android-avd",
+                      "category":  "Developer data",
+                      "paths":  [
+                                    "%USERPROFILE%\\.android\\avd"
+                                ],
+                      "type":  "Folder",
+                      "verdict":  "ProbablySafe",
+                      "reason":  "Android emulator images. Recreate via Android Studio.",
+                      "article":  "Each AVD is a full Android system image, typically 3-10 GB each. Safe to delete unused ones; Android Studio can recreate them on demand."
+                  },
+                  {
+                      "id":  "android-sdk-system-images",
+                      "category":  "Developer data",
+                      "paths":  [
+                                    "%LOCALAPPDATA%\\Android\\Sdk\\system-images"
+                                ],
+                      "type":  "Folder",
+                      "verdict":  "ProbablySafe",
+                      "reason":  "Android system images for the emulator. Re-downloadable via SDK Manager.",
+                      "article":  "One system image per Android API level. Keep only the levels you actually test on."
+                  },
+                  {
+                      "id":  "claude-vm",
+                      "category":  "App data",
+                      "paths":  [
+                                    "%LOCALAPPDATA%\\Packages\\Claude_pzs8sxrjxfjjc\\LocalCache\\Roaming\\Claude\\vm_bundles"
+                                ],
+                      "type":  "Folder",
+                      "verdict":  "ProbablySafe",
+                      "reason":  "Claude Desktop\u0027s local VM bundle. Best removed by uninstall + reinstall.",
+                      "article":  "Claude Desktop runs a local VM for some features. This folder is large but deleting it directly may break the app. Uninstall + reinstall Claude Desktop to remove cleanly."
+                  },
+                  {
+                      "id":  "hibernation-file",
+                      "category":  "System (recoverable)",
+                      "paths":  [
+                                    "C:\\hiberfil.sys"
+                                ],
+                      "type":  "File",
+                      "verdict":  "ProbablySafe",
+                      "reason":  "Hibernation file. If you don\u0027t use hibernate/sleep, disable with \u0027powercfg /h off\u0027 (admin).",
+                      "article":  "Takes 40% of your RAM size. Removing it means hibernate and Fast Startup stop working, but normal shutdown/restart still work."
+                  },
+                  {
+                      "id":  "onedrive",
+                      "category":  "User data",
+                      "paths":  [
+                                    "%USERPROFILE%\\OneDrive"
+                                ],
+                      "type":  "Folder",
+                      "verdict":  "UserCall",
+                      "reason":  "Synced to cloud. Use \u0027Free up space\u0027 in OneDrive settings.",
+                      "article":  "OneDrive keeps local copies of cloud files. If space is tight, right-click tray -\u003e Free up space - this converts them to online-only placeholders without losing anything."
+                  },
+                  {
+                      "id":  "downloads",
+                      "category":  "User data",
+                      "paths":  [
+                                    "%USERPROFILE%\\Downloads"
+                                ],
+                      "type":  "Folder",
+                      "verdict":  "UserCall",
+                      "reason":  "Your downloads. Review contents before removing.",
+                      "article":  "Downloads can contain anything from installers to personal files. Check the top items before deciding."
+                  },
+                  {
+                      "id":  "documents",
+                      "category":  "User data",
+                      "paths":  [
+                                    "%USERPROFILE%\\Documents"
+                                ],
+                      "type":  "Folder",
+                      "verdict":  "UserCall",
+                      "reason":  "Your personal documents.",
+                      "article":  "Personal files. Review before deleting anything in here."
+                  },
+                  {
+                      "id":  "videos",
+                      "category":  "User data",
+                      "paths":  [
+                                    "%USERPROFILE%\\Videos"
+                                ],
+                      "type":  "Folder",
+                      "verdict":  "UserCall",
+                      "reason":  "Your videos.",
+                      "article":  "Video files are large but irreplaceable. Back up, don\u0027t delete."
+                  },
+                  {
+                      "id":  "windows",
+                      "category":  "System",
+                      "paths":  [
+                                    "C:\\Windows"
+                                ],
+                      "type":  "Folder",
+                      "verdict":  "DontTouch",
+                      "reason":  "Operating system. Use Disk Cleanup for safe reclaiming.",
+                      "article":  "Never delete this folder. Use Settings -\u003e System -\u003e Storage or cleanmgr for safe space recovery."
+                  },
+                  {
+                      "id":  "program-files",
+                      "category":  "System",
+                      "paths":  [
+                                    "C:\\Program Files"
+                                ],
+                      "type":  "Folder",
+                      "verdict":  "DontTouch",
+                      "reason":  "Installed applications. Uninstall via Settings.",
+                      "article":  "Deleting an installed app\u0027s folder leaves registry entries and services orphaned. Use Settings -\u003e Apps -\u003e Uninstall."
+                  },
+                  {
+                      "id":  "program-files-x86",
+                      "category":  "System",
+                      "paths":  [
+                                    "C:\\Program Files (x86)"
+                                ],
+                      "type":  "Folder",
+                      "verdict":  "DontTouch",
+                      "reason":  "Installed applications. Uninstall via Settings.",
+                      "article":  "Same as Program Files, for 32-bit applications."
+                  },
+                  {
+                      "id":  "recovery",
+                      "category":  "System",
+                      "paths":  [
+                                    "C:\\Recovery"
+                                ],
+                      "type":  "Folder",
+                      "verdict":  "DontTouch",
+                      "reason":  "Windows recovery environment.",
+                      "article":  "Needed to repair or reset Windows. Never delete."
+                  },
+                  {
+                      "id":  "pagefile",
+                      "category":  "System",
+                      "paths":  [
+                                    "C:\\pagefile.sys"
+                                ],
+                      "type":  "File",
+                      "verdict":  "DontTouch",
+                      "reason":  "Windows virtual memory. Deleting it can prevent Windows from booting.",
+                      "article":  "Windows uses pagefile as overflow RAM. You can move it to another drive or resize it, but never delete it.",
+                      "detect":  "pagefile"
+                  },
+                  {
+                      "id":  "system-volume-info",
+                      "category":  "System",
+                      "paths":  [
+                                    "C:\\System Volume Information"
+                                ],
+                      "type":  "Folder",
+                      "verdict":  "DontTouch",
+                      "reason":  "System restore points.",
+                      "article":  "Windows keeps restore points here. Shrinking the shadow storage cap via vssadmin frees space safely."
+                  },
+                  {
+                      "id":  "comfyui-models",
+                      "category":  "App data",
+                      "paths":  [
+                                    "%USERPROFILE%\\ComfyUI"
+                                ],
+                      "type":  "Folder",
+                      "verdict":  "UserCall",
+                      "reason":  "ComfyUI AI models. Large but required if you use ComfyUI.",
+                      "article":  "ComfyUI\u0027s models folder is often 10-50 GB. If you use ComfyUI, don\u0027t delete - back up the models. If not, safe to remove."
+                  },
+                  {
+                      "id":  "vscode-extensions",
+                      "category":  "App data",
+                      "paths":  [
+                                    "%USERPROFILE%\\.vscode\\extensions"
+                                ],
+                      "type":  "Folder",
+                      "verdict":  "ProbablySafe",
+                      "reason":  "VS Code extensions. Re-installable from your extensions list.",
+                      "article":  "Each extension is a folder here. Re-installable from Settings -\u003e Extensions -\u003e @installed."
+                  }
+              ]
 }
