@@ -51,3 +51,4 @@ The "brain" of Discart is the `rules.json` file. If you find an app that hoards 
 
 ## ⚖️ License
 MIT — see [LICENSE](LICENSE). You are free to use, modify, and distribute this software.
+ 
