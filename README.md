@@ -36,7 +36,7 @@ I want to build the most trusted, transparent, and safest disk utility on the in
 
 ## 🛠️ How to use it
 1. Go to the [Releases page](https://github.com/mehedinassah/Discart/releases/latest).
-2. Download `Discart-v1.0.0.zip`.
+2. Download `Discart-v1.1.0.zip`.
 3. Extract it anywhere (it is 100% portable, no installation required).
 4. Double-click `Discart.exe`. 
 5. Review the list. Green items are pre-checked. Blue and Red items require your manual inspection.
